@@ -146,7 +146,7 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
         loaderManager.load(identifier);
     }
 
-    private void clearAnalysisOverlay(){
+    protected void clearAnalysisOverlay(){
         context.clearAnalysisOverlay();
         interactorsManager.clearAnalysisOverlay();
     }
