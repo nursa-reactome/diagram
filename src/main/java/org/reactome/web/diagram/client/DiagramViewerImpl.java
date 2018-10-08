@@ -29,14 +29,16 @@ import java.util.Set;
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
-class DiagramViewerImpl extends AbstractDiagramViewer implements
-        LayoutLoadedHandler, ContentRequestedHandler, ContentLoadedHandler, KeyDownHandler,
-        InteractorsLoadedHandler, InteractorsResourceChangedHandler, InteractorsCollapsedHandler, InteractorHoveredHandler,
-        InteractorsLayoutUpdatedHandler, InteractorsFilteredHandler, InteractorSelectedHandler,
-        AnalysisResultRequestedHandler, AnalysisResultLoadedHandler, AnalysisResetHandler, ExpressionColumnChangedHandler,
+public class DiagramViewerImpl extends AbstractDiagramViewer
+        implements LayoutLoadedHandler, ContentRequestedHandler, ContentLoadedHandler,
+        KeyDownHandler, InteractorsLoadedHandler, InteractorsResourceChangedHandler,
+        InteractorsCollapsedHandler, InteractorHoveredHandler,
+        InteractorsLayoutUpdatedHandler, InteractorsFilteredHandler,
+        InteractorSelectedHandler, AnalysisResultRequestedHandler,
+        AnalysisResultLoadedHandler, AnalysisResetHandler, ExpressionColumnChangedHandler,
         GraphObjectHoveredHandler, GraphObjectSelectedHandler,
-        DiagramObjectsFlagRequestHandler, DiagramObjectsFlaggedHandler, DiagramObjectsFlagResetHandler,
-        IllustrationSelectedHandler,
+        DiagramObjectsFlagRequestHandler, DiagramObjectsFlaggedHandler,
+        DiagramObjectsFlagResetHandler, IllustrationSelectedHandler,
         FireworksOpenedHandler, FlaggedElementsLoader.Handler {
 
     private Context context;
@@ -46,25 +48,25 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
     private InteractorsManager interactorsManager;
     private FlaggedElementsLoader flaggedElementsLoader = new FlaggedElementsLoader(this);
 
-    DiagramViewerImpl() {
+    protected DiagramViewerImpl() {
         super();
         this.viewerContainer = new ViewerContainer(eventBus);
         this.loaderManager = new LoaderManager(eventBus);
         AnalysisDataLoader.initialise(eventBus);
         this.interactorsManager = new InteractorsManager(eventBus);
         this.initWidget(this.viewerContainer);
-        this.getElement().addClassName("pwp-DiagramViewer"); //IMPORTANT!
+        this.getElement().addClassName("pwp-DiagramViewer"); // IMPORTANT!
     }
 
     protected void initialise() {
-        if(!initialised) { //initialised is defined in the AbstractDiagramViewer
+        if (!initialised) { // initialised is defined in the AbstractDiagramViewer
             super.initialise();
             this.initHandlers();
         }
     }
 
     private void initHandlers() {
-        //Attaching this as a KeyDownHandler
+        // Attaching this as a KeyDownHandler
         RootPanel.get().addDomHandler(this, KeyDownEvent.getType());
 
         eventBus.addHandler(AnalysisResultRequestedEvent.TYPE, this);
@@ -101,9 +103,11 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
         if (context != null && identifier != null) {
             Set<DiagramObject> flagged = context.getFlagged(identifier);
             if (flagged == null) {
-                eventBus.fireEventFromSource(new DiagramObjectsFlagRequestedEvent(identifier), this);
+                eventBus.fireEventFromSource(
+                        new DiagramObjectsFlagRequestedEvent(identifier), this);
             } else {
-                eventBus.fireEventFromSource(new DiagramObjectsFlaggedEvent(identifier, flagged, false), this);
+                eventBus.fireEventFromSource(
+                        new DiagramObjectsFlaggedEvent(identifier, flagged, false), this);
             }
         }
     }
@@ -111,9 +115,11 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
     @Override
     public void highlightItem(String stableIdentifier) {
         try {
-            GraphObject item = this.context.getContent().getDatabaseObject(stableIdentifier);
+            GraphObject item = this.context.getContent()
+                    .getDatabaseObject(stableIdentifier);
             viewerContainer.highlightGraphObject(item, true);
-        } catch (Exception e) {/*Nothing here*/}
+        } catch (Exception e) {
+            /* Nothing here */}
     }
 
     @Override
@@ -121,14 +127,15 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
         try {
             GraphObject item = this.context.getContent().getDatabaseObject(dbIdentifier);
             viewerContainer.highlightGraphObject(item, true);
-        } catch (Exception e) {/*Nothing here*/}
+        } catch (Exception e) {
+            /* Nothing here */}
     }
 
     @Override
     public void loadDiagram(String stId) {
         if (stId != null) {
             if (context == null || !stId.equals(context.getContent().getStableId())) {
-                load(stId); //Names are interchangeable because there are symlinks
+                load(stId); // Names are interchangeable because there are symlinks
             }
         }
     }
@@ -137,16 +144,16 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
     public void loadDiagram(Long dbId) {
         if (dbId != null) {
             if (context == null || !dbId.equals(context.getContent().getDbId())) {
-                load("" + dbId); //Names are interchangeable because there are symlinks
+                load("" + dbId); // Names are interchangeable because there are symlinks
             }
         }
     }
 
-    private void load(String identifier) { //TODO: stay here
+    private void load(String identifier) { // TODO: stay here
         loaderManager.load(identifier);
     }
 
-    protected void clearAnalysisOverlay(){
+    protected void clearAnalysisOverlay() {
         context.clearAnalysisOverlay();
         interactorsManager.clearAnalysisOverlay();
     }
@@ -159,7 +166,8 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
         } else if (!analysisStatus.equals(this.context.getAnalysisStatus())) {
             this.analysisStatus = analysisStatus;
             clearAnalysisOverlay();
-            AnalysisDataLoader.get().loadAnalysisResult(analysisStatus, this.context.getContent());
+            AnalysisDataLoader.get().loadAnalysisResult(analysisStatus,
+                    this.context.getContent());
         }
     }
 
@@ -175,9 +183,11 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
     public void onAnalysisResultLoaded(AnalysisResultLoadedEvent event) {
         analysisStatus.setAnalysisSummary(event.getSummary());
         analysisStatus.setExpressionSummary(event.getExpressionSummary());
-        context.setAnalysisOverlay(analysisStatus, event.getFoundElements(), event.getPathwaySummaries());
-        interactorsManager.setAnalysisOverlay(event.getFoundElements(), context.getContent().getIdentifierMap());
-        Scheduler.get().scheduleDeferred(() -> { //TODO NOT SURE THIS IS NEEDED...
+        context.setAnalysisOverlay(analysisStatus, event.getFoundElements(),
+                event.getPathwaySummaries());
+        interactorsManager.setAnalysisOverlay(event.getFoundElements(),
+                context.getContent().getIdentifierMap());
+        Scheduler.get().scheduleDeferred(() -> { // TODO NOT SURE THIS IS NEEDED...
             viewerContainer.loadAnalysis();
         });
     }
@@ -203,14 +213,17 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
     }
 
     @Override
-    public void flaggedElementsLoaded(String term, Collection<DatabaseObject> toFlag, boolean notify) {
+    public void flaggedElementsLoaded(String term, Collection<DatabaseObject> toFlag,
+            boolean notify) {
         Set<DiagramObject> flagged = new HashSet<>();
         for (DatabaseObject object : toFlag) {
-            GraphObject graphObject = context.getContent().getDatabaseObject(object.getDbId());
+            GraphObject graphObject = context.getContent()
+                    .getDatabaseObject(object.getDbId());
             flagged.addAll(graphObject.getDiagramObjects());
         }
         context.setFlagged(term, flagged);
-        eventBus.fireEventFromSource(new DiagramObjectsFlaggedEvent(term, flagged, notify), this);
+        eventBus.fireEventFromSource(
+                new DiagramObjectsFlaggedEvent(term, flagged, notify), this);
     }
 
     @Override
@@ -251,16 +264,20 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
 
     @Override
     public void onGraphObjectHovered(GraphObjectHoveredEvent event) {
-        //In order to have fine grain hovering capabilities, this class is not taking actions for onGraphObjectHovered
-        //when it is fired by a visualiser, so we ONLY want to do the STANDARD action (highlight) when the event comes from
-        //the outside. That is the reason of the next line of code
+        // In order to have fine grain hovering capabilities, this class is
+        // not taking actions for onGraphObjectHovered
+        // when it is fired by a visualiser, so we ONLY want to do the
+        // STANDARD action (highlight) when the event comes from
+        // the outside. That is the reason of the next line of code
         if (event.getSource() instanceof Visualiser) {
-            // Handles outside notification in case the event comes from a visualiser.
+            // Handles outside notification in case the event comes from a
+            // visualiser.
             fireEvent(event);
         } else {
             // Highlight and notify depending on the outcome
-            if (context == null) return;
-            if (viewerContainer.highlightGraphObject(event.getGraphObject(), false)){
+            if (context == null)
+                return;
+            if (viewerContainer.highlightGraphObject(event.getGraphObject(), false)) {
                 fireEvent(event);
             }
         }
@@ -269,14 +286,16 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
     @Override
     public void onGraphObjectSelected(final GraphObjectSelectedEvent event) {
         if (event.getSource() instanceof Visualiser) {
-            // Handles outside notification in case the event comes from a visualiser.
+            // Handles outside notification in case the event comes from a
+            // visualiser.
             if (event.getFireExternally()) {
                 fireEvent(event);
             }
         } else {
             // Highlight and notify depending on the outcome
-            if (context == null) return;
-            if (viewerContainer.selectItem(event.getGraphObject(), false)){
+            if (context == null)
+                return;
+            if (viewerContainer.selectItem(event.getGraphObject(), false)) {
                 if (event.getFireExternally()) {
                     fireEvent(event);
                 }
@@ -291,11 +310,13 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
 
     @Override
     public void onInteractorHovered(InteractorHoveredEvent event) {
-        //In order to have fine grain hovering capabilities, this class is not taking actions for onInteractorHovered
-        //when it is fired by its own, so we ONLY want to do the STANDARD action (highlight) when the event comes from
-        //the outside. That is the reason of the next line of code
+        // In order to have fine grain hovering capabilities, this class is
+        // not taking actions for onInteractorHovered
+        // when it is fired by its own, so we ONLY want to do the STANDARD
+        // action (highlight) when the event comes from
+        // the outside. That is the reason of the next line of code
         if (event.getSource() instanceof Visualiser) {
-            fireEvent(event); //needs outside notification
+            fireEvent(event); // needs outside notification
             return;
         } else {
             if (context != null) {
@@ -350,7 +371,8 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
 
     @Override
     public void onResize() {
-        super.onResize(); //Need to call super to propagate the resizing to the contained elements
+        super.onResize(); // Need to call super to propagate the resizing to the contained
+                          // elements
         this.viewportWidth = getOffsetWidth();
         this.viewportHeight = getOffsetHeight();
     }
@@ -403,33 +425,42 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
 
     @Override
     public void setAnalysisToken(String token, String resource) {
-        final AnalysisStatus analysisStatus = (token == null) ? null : new AnalysisStatus(eventBus, token, resource);
-        AnalysisTokenValidator.checkTokenAvailability(token, new AnalysisTokenValidator.TokenAvailabilityHandler() {
-            @Override
-            public void onTokenAvailabilityChecked(boolean available, String message) {
-                if (available) {
-                    loadAnalysis(analysisStatus);
-                } else {
-                    eventBus.fireEventFromSource(new DiagramInternalErrorEvent(message), DiagramViewerImpl.this);
-                }
-            }
-        });
+        final AnalysisStatus analysisStatus = (token == null) ? null
+                : new AnalysisStatus(eventBus, token, resource);
+        AnalysisTokenValidator.checkTokenAvailability(token,
+                new AnalysisTokenValidator.TokenAvailabilityHandler() {
+                    @Override
+                    public void onTokenAvailabilityChecked(boolean available,
+                            String message) {
+                        if (available) {
+                            loadAnalysis(analysisStatus);
+                        } else {
+                            eventBus.fireEventFromSource(
+                                    new DiagramInternalErrorEvent(message),
+                                    DiagramViewerImpl.this);
+                        }
+                    }
+                });
     }
 
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
-        if (visible) onResize();
+        if (visible)
+            onResize();
         if (context != null) {
-            if (visible) context.restoreDialogs();
-            else context.hideDialogs();
+            if (visible)
+                context.restoreDialogs();
+            else
+                context.hideDialogs();
         }
     }
 
     private void resetContext() {
         viewerContainer.resetContext();
         if (this.context != null) {
-            //Once a context is due to be replaced, the analysis overlay has to be cleaned up
+            // Once a context is due to be replaced, the analysis overlay has to
+            // be cleaned up
             clearAnalysisOverlay();
             this.context = null;
         }
@@ -445,18 +476,22 @@ class DiagramViewerImpl extends AbstractDiagramViewer implements
         viewerContainer.setContext(context);
 
         if (this.context.getContent().isGraphLoaded()) {
-            this.loadAnalysis(this.analysisStatus); //IMPORTANT: This needs to be done once context is been set up above
+            this.loadAnalysis(this.analysisStatus); // IMPORTANT: This needs to be done
+                                                    // once context is been set up above
             this.eventBus.fireEventFromSource(new ContentLoadedEvent(context), this);
         }
     }
 
     @Override
     public void onKeyDown(KeyDownEvent keyDownEvent) {
-        if(isVisible() && DiagramFactory.RESPOND_TO_SEARCH_SHORTCUT){
+        if (isVisible() && DiagramFactory.RESPOND_TO_SEARCH_SHORTCUT) {
             int keyCode = keyDownEvent.getNativeKeyCode();
             String platform = Window.Navigator.getPlatform();
-            // If this is a Mac, check for the cmd key. In case of any other platform, check for the ctrl key
-            boolean isModifierKeyPressed = platform.toLowerCase().contains("mac") ? keyDownEvent.isMetaKeyDown() : keyDownEvent.isControlKeyDown();
+            // If this is a Mac, check for the cmd key. In case of any other
+            // platform, check for the ctrl key
+            boolean isModifierKeyPressed = platform.toLowerCase().contains("mac")
+                    ? keyDownEvent.isMetaKeyDown()
+                    : keyDownEvent.isControlKeyDown();
             if (keyCode == KeyCodes.KEY_F && isModifierKeyPressed) {
                 keyDownEvent.preventDefault();
                 keyDownEvent.stopPropagation();
