@@ -12,6 +12,7 @@ import org.reactome.web.diagram.data.AnalysisStatus;
 import org.reactome.web.diagram.data.Context;
 import org.reactome.web.diagram.data.GraphObjectFactory;
 import org.reactome.web.diagram.data.graph.model.GraphObject;
+import org.reactome.web.diagram.data.graph.model.GraphPhysicalEntity;
 import org.reactome.web.diagram.data.layout.DiagramObject;
 import org.reactome.web.diagram.data.loader.AnalysisDataLoader;
 import org.reactome.web.diagram.data.loader.AnalysisTokenValidator;
@@ -19,10 +20,9 @@ import org.reactome.web.diagram.data.loader.FlaggedElementsLoader;
 import org.reactome.web.diagram.data.loader.LoaderManager;
 import org.reactome.web.diagram.events.*;
 import org.reactome.web.diagram.handlers.*;
+import org.reactome.web.diagram.search.results.data.model.Occurrences;
 import org.reactome.web.diagram.util.Console;
-import org.reactome.web.pwp.model.client.classes.DatabaseObject;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,6 +39,7 @@ public class DiagramViewerImpl extends AbstractDiagramViewer
         GraphObjectHoveredHandler, GraphObjectSelectedHandler,
         DiagramObjectsFlagRequestHandler, DiagramObjectsFlaggedHandler,
         DiagramObjectsFlagResetHandler, IllustrationSelectedHandler,
+        DiagramProfileChangedHandler, AnalysisProfileChangedHandler,
         FireworksOpenedHandler, FlaggedElementsLoader.Handler {
 
     private Context context;
@@ -96,11 +97,14 @@ public class DiagramViewerImpl extends AbstractDiagramViewer
         eventBus.addHandler(InteractorsLoadedEvent.TYPE, this);
 
         eventBus.addHandler(FireworksOpenedEvent.TYPE, this);
+
+        eventBus.addHandler(DiagramProfileChangedEvent.TYPE, this);
+        eventBus.addHandler(AnalysisProfileChangedEvent.TYPE, this);
     }
 
     @Override
     public void flagItems(String identifier) {
-        if (context != null && identifier != null) {
+        if (context != null && identifier != null && !identifier.equals(viewerContainer.getFlagTerm())) {
             Set<DiagramObject> flagged = context.getFlagged(identifier);
             if (flagged == null) {
                 eventBus.fireEventFromSource(
@@ -213,14 +217,34 @@ public class DiagramViewerImpl extends AbstractDiagramViewer
     }
 
     @Override
-    public void flaggedElementsLoaded(String term, Collection<DatabaseObject> toFlag,
-            boolean notify) {
+    public void flaggedElementsLoaded(String term, Occurrences toFlag, boolean notify) {
         Set<DiagramObject> flagged = new HashSet<>();
-        for (DatabaseObject object : toFlag) {
-            GraphObject graphObject = context.getContent()
-                    .getDatabaseObject(object.getDbId());
-            flagged.addAll(graphObject.getDiagramObjects());
+        if(toFlag != null && toFlag.getOccurrences() != null) {
+            for (String stId : toFlag.getOccurrences()) {
+                GraphObject graphObject = context.getContent().getDatabaseObject(stId);
+                if (graphObject != null) {
+                    flagged.addAll(graphObject.getDiagramObjects());
+                    //Next step gets all glyph in the diagram containing the target object
+                    if (graphObject instanceof GraphPhysicalEntity) {
+                        GraphPhysicalEntity pe = (GraphPhysicalEntity) graphObject;
+                        for (GraphPhysicalEntity parentLocation : pe.getParentLocations()) {
+                            flagged.addAll(parentLocation.getDiagramObjects());
+                        }
+                    }
+                }
+            }
         }
+
+        //Flag those diagram entities that interact with the term
+        if(toFlag != null && toFlag.getInteractsWith() != null) {
+            for (String stId : toFlag.getInteractsWith()) {
+                GraphObject graphObject = context.getContent().getDatabaseObject(stId);
+                if (graphObject != null) {
+                    flagged.addAll(graphObject.getDiagramObjects());
+                }
+            }
+        }
+
         context.setFlagged(term, flagged);
         eventBus.fireEventFromSource(
                 new DiagramObjectsFlaggedEvent(term, flagged, notify), this);
@@ -498,5 +522,15 @@ public class DiagramViewerImpl extends AbstractDiagramViewer
                 eventBus.fireEventFromSource(new SearchKeyPressedEvent(), this);
             }
         }
+    }
+
+    @Override
+    public void onDiagramProfileChanged(DiagramProfileChangedEvent event) {
+        fireEvent(event);
+    }
+
+    @Override
+    public void onAnalysisProfileChanged(AnalysisProfileChangedEvent event) {
+        fireEvent(event);
     }
 }
