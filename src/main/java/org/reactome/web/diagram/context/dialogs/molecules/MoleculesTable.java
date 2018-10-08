@@ -121,7 +121,7 @@ public class MoleculesTable<T extends GraphPhysicalEntity> extends DataGrid<T> {
         Collections.sort(molecules, GraphPhysicalEntity.getDisplayNameComparator());
         List<T> list = new LinkedList<>();
         List<T> tailList = new LinkedList<>();
-        if(analysisType==null || analysisType == AnalysisType.OVERREPRESENTATION || analysisType==AnalysisType.SPECIES_COMPARISON) {
+        if(analysisType==null || analysisType == AnalysisType.OVERREPRESENTATION || analysisType==AnalysisType.SPECIES_COMPARISON || analysisType==AnalysisType.DATASET_COMPARISON) {
             // We have to move all the NOT HIT molecules at the very end
             for (T molecule : molecules) {
                 if (!molecule.isHit()) tailList.add(molecule);
@@ -185,7 +185,7 @@ public class MoleculesTable<T extends GraphPhysicalEntity> extends DataGrid<T> {
     @Override
     public void redraw() {
         super.redraw();
-        if(this.analysisType==AnalysisType.OVERREPRESENTATION || this.analysisType==AnalysisType.SPECIES_COMPARISON ) {
+        if(this.analysisType==AnalysisType.OVERREPRESENTATION || this.analysisType==AnalysisType.SPECIES_COMPARISON  || analysisType==AnalysisType.DATASET_COMPARISON) {
             Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                 @Override
                 public void execute() {

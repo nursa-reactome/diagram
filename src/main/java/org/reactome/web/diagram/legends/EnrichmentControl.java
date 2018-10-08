@@ -62,6 +62,7 @@ public class EnrichmentControl extends LegendPanel implements ClickHandler,
         switch (event.getType()) {
             case OVERREPRESENTATION:
             case SPECIES_COMPARISON:
+            case DATASET_COMPARISON:
                 String message = event.getType().name().replaceAll("_", " ");
                 this.message.setText(message.toUpperCase());
                 makeVisible(200); // Appear with delay

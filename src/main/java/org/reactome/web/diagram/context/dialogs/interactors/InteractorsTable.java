@@ -194,7 +194,7 @@ public class InteractorsTable<T extends RawInteractor> extends DataGrid<T> {
                 foreColour = "#AAAAAA";
                 backColour = "transparent";
             } else {
-                if(isHit && (analysisType==AnalysisType.OVERREPRESENTATION || analysisType==AnalysisType.SPECIES_COMPARISON)) {
+                if(isHit && (analysisType==AnalysisType.OVERREPRESENTATION || analysisType==AnalysisType.SPECIES_COMPARISON || analysisType==AnalysisType.DATASET_COMPARISON)) {
                     foreColour = "#000000";
                     backColour = AnalysisColours.get().PROFILE.getEnrichment().getGradient().getMax();
                 } else {

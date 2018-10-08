@@ -809,6 +809,7 @@ public class SVGVisualiser extends AbstractSVGPanel implements Visualiser,
                 float percentage;
                 switch (analysisStatus.getAnalysisType()) {
                     case SPECIES_COMPARISON:
+                    case DATASET_COMPARISON:
                     case OVERREPRESENTATION:
                         percentage = graphPathway.isHit() ? graphPathway.getPercentage().floatValue() : 0;
 

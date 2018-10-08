@@ -60,6 +60,7 @@ public class ItemsDistribution {
                             switch (analysisType) {
                                 case OVERREPRESENTATION:
                                 case SPECIES_COMPARISON:
+                                case DATASET_COMPARISON:
                                     if(item.getIsDisease()!=null) {
                                         getOrCreate(renderableClass).add(RenderType.HIT_BY_ENRICHMENT_DISEASE, item);
                                     }else{

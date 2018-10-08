@@ -376,6 +376,7 @@ class DiagramCanvas extends AbsolutePanel implements ExpressionColumnChangedHand
                         renderer.draw(interactors, entity, factor, offset);
                         break;
                     case OVERREPRESENTATION:
+                    case DATASET_COMPARISON:
                         renderer.drawEnrichment(interactors, entity, factor, offset);
                         break;
                     case EXPRESSION:

@@ -61,6 +61,7 @@ public class EnrichmentLegend extends LegendPanel implements AnalysisResultLoade
         switch (event.getType()){
             case OVERREPRESENTATION:
             case SPECIES_COMPARISON:
+            case DATASET_COMPARISON:
                 if(context.getContent().getType() == SVG) {
                     setVisible(true);
                 }
