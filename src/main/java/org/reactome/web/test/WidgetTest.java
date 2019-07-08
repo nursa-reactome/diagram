@@ -56,7 +56,7 @@ public class WidgetTest implements EntryPoint {
                     @Override
                     public void onContentLoaded(ContentLoadedEvent event) {
 //                        diagram.flagItems("NODAL");
-                        diagram.flagItems("R-HSA-179837");
+                        diagram.flagItems("R-HSA-179837", true);
                     }
                 });
             }
