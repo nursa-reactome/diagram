@@ -50,7 +50,7 @@ public class DiagramViewerImpl extends AbstractDiagramViewer
     private FlaggedElementsLoader flaggedElementsLoader = new FlaggedElementsLoader(this);
     private Boolean includeInteractors = false;
 
-    protected DiagramViewerImpl() {
+    public DiagramViewerImpl() {
         super();
         this.viewerContainer = new ViewerContainer(eventBus);
         this.loaderManager = new LoaderManager(eventBus);
